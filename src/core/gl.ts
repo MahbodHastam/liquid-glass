@@ -54,14 +54,15 @@ export function pollProgram(gl: WebGL2RenderingContext, p: Program, parallel: bo
 
 function finishProgram(gl: WebGL2RenderingContext, p: Program): void {
   if (!gl.getProgramParameter(p.prog, gl.LINK_STATUS)) {
-    // compile status is only queried on failure
-    const log = [
-      gl.getShaderInfoLog(p.vs),
-      gl.getShaderInfoLog(p.fs),
-      gl.getProgramInfoLog(p.prog),
-    ].filter(Boolean).join('\n')
-    if (!gl.isContextLost())
-      console.error(`[liquid-glass] shader link failed:\n${log}`)
+    // logs are only read on failure, and only in dev builds; prod still falls back to CSS
+    // eslint-disable-next-line node/prefer-global/process
+    if (process.env.NODE_ENV !== 'production' && !gl.isContextLost()) {
+      console.error(`[liquid-glass] shader link failed:\n${[
+        gl.getShaderInfoLog(p.vs),
+        gl.getShaderInfoLog(p.fs),
+        gl.getProgramInfoLog(p.prog),
+      ].filter(Boolean).join('\n')}`)
+    }
     p.failed = true
   }
   else {

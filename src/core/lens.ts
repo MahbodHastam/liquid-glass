@@ -42,7 +42,7 @@ export class Lens {
   tint: [number, number, number, number] = [0, 0, 0, 0]
   pointerAngle: number | null = null
   status: LensStatus = { webgl: false, reason: null }
-  ctx: CanvasRenderingContext2D | null = null
+  ctx: CanvasRenderingContext2D | ImageBitmapRenderingContext | null = null
   pw = 0
   ph = 0
 

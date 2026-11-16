@@ -178,44 +178,20 @@ export function parseColor(input: string): [number, number, number, number] {
   return parseNormalizedColor(norm)
 }
 
-/** Parse '#rgb[a]', '#rrggbb[aa]', 'rgb()/rgba()' in comma or space syntax. */
+/**
+ * Parse what a canvas `fillStyle` round-trip yields: '#rrggbb' or 'rgb[a](r, g, b[, a])'
+ * (space syntax also accepted). Anything else → transparent.
+ */
 export function parseNormalizedColor(s: string): [number, number, number, number] {
-  if (s.startsWith('#')) {
-    let h = s.slice(1)
-    if (h.length === 3 || h.length === 4)
-      h = [...h].map(c => c + c).join('')
-    if (h.length === 6)
-      h += 'ff'
-    if (h.length !== 8)
-      return [0, 0, 0, 0]
-    const n = Number.parseInt(h, 16)
-    if (Number.isNaN(n))
-      return [0, 0, 0, 0]
-    return [
-      (n >>> 24 & 255) / 255,
-      (n >>> 16 & 255) / 255,
-      (n >>> 8 & 255) / 255,
-      (n & 255) / 255,
-    ]
-  }
-  const m = s.match(/^rgba?\(([^)]+)\)$/)
-  if (!m)
+  const n = s[0] === '#' && s.length === 7
+    ? [1, 3, 5].map(i => Number.parseInt(s.slice(i, i + 2), 16))
+    : (s.match(/[\d.]+/g) ?? []).map(Number)
+  if (n.length < 3 || n.some(Number.isNaN))
     return [0, 0, 0, 0]
-  const parts = m[1]!.split(/[\s,/]+/).filter(Boolean)
-  const ch = (v: string | undefined, scale: number) => {
-    if (v === undefined)
-      return 1
-    return v.endsWith('%')
-      ? Number.parseFloat(v) / 100
-      : Number.parseFloat(v) / scale
-  }
-  const out = [
-    ch(parts[0], 255),
-    ch(parts[1], 255),
-    ch(parts[2], 255),
-    ch(parts[3], 1),
-  ]
-  return out.map(v => (Number.isFinite(v)
-    ? clamp(v, 0, 1)
-    : 0)) as [number, number, number, number]
+  return [
+    n[0]! / 255,
+    n[1]! / 255,
+    n[2]! / 255,
+    n[3] ?? 1,
+  ].map(v => clamp(v, 0, 1)) as [number, number, number, number]
 }

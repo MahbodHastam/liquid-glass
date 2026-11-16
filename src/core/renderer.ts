@@ -17,6 +17,12 @@ export interface RendererConfig {
   maxDpr: number
   /** Default quality for lenses that don't set one. Default 'auto'. */
   quality: QualitySetting
+  /**
+   * How pixels reach each lens canvas. 'auto'/'bitmap': OffscreenCanvas transferToImageBitmap
+   * → bitmaprenderer (zero-copy) where supported. 'copy': drawImage into a 2D canvas, which can
+   * force a GPU readback per draw. See docs/perf.md.
+   */
+  present?: 'auto' | 'bitmap' | 'copy'
 }
 
 export interface RendererStats {
@@ -27,6 +33,8 @@ export interface RendererStats {
   blurPasses: number
   /** Taps per pixel of the most recent glass draw. */
   tapsPerPixel: number
+  /** Main-thread ms spent inside frames (CPU side, incl. any readback stalls). */
+  cpuMs: number
 }
 
 interface Chain {
@@ -47,7 +55,7 @@ interface SourceState {
   unsub: () => void
 }
 
-const config: RendererConfig = { maxDpr: 1.5, quality: 'auto' }
+const config: RendererConfig = { maxDpr: 1.5, quality: 'auto', present: 'auto' }
 
 /** Set global renderer defaults (used by the Vue plugin / Nuxt module). */
 export function configureRenderer(c: Partial<RendererConfig>): void {
@@ -72,7 +80,8 @@ export function peekRenderer(): Renderer | null {
  * that receives its pixels via drawImage only when that lens changed.
  */
 export class Renderer {
-  readonly canvas: HTMLCanvasElement
+  readonly canvas: HTMLCanvasElement | OffscreenCanvas
+  readonly present: 'bitmap' | 'copy'
   gl: WebGL2RenderingContext | null = null
   failed = false
   lost = false
@@ -84,6 +93,7 @@ export class Renderer {
     uploads: 0,
     blurPasses: 0,
     tapsPerPixel: 0,
+    cpuMs: 0,
   }
 
   private lenses = new Set<Lens>()
@@ -114,7 +124,15 @@ export class Renderer {
         }
       }
     })
-    this.canvas = document.createElement('canvas')
+    const canBitmap = typeof OffscreenCanvas !== 'undefined'
+      && typeof OffscreenCanvas.prototype.transferToImageBitmap === 'function'
+      && typeof OffscreenCanvas.prototype.addEventListener === 'function'
+    this.present = config.present === 'copy' || !canBitmap
+      ? 'copy'
+      : 'bitmap'
+    this.canvas = this.present === 'bitmap'
+      ? new OffscreenCanvas(256, 256)
+      : document.createElement('canvas')
     this.canvas.width = 256
     this.canvas.height = 256
     this.initContext()
@@ -124,7 +142,7 @@ export class Renderer {
   // ---------------------------------------------------------------- lifecycle
 
   private initContext(): void {
-    const gl = this.canvas.getContext('webgl2', {
+    const gl = (this.canvas as HTMLCanvasElement).getContext('webgl2', {
       alpha: true,
       premultipliedAlpha: true,
       antialias: false,
@@ -286,7 +304,9 @@ export class Renderer {
   addLens(o: LensOptions): Lens {
     const lens = new Lens(this, o)
     this.lenses.add(lens)
-    lens.ctx = lens.canvas.getContext('2d')
+    lens.ctx = this.present === 'bitmap'
+      ? lens.canvas.getContext('bitmaprenderer')
+      : lens.canvas.getContext('2d')
     this.ro?.observe(lens.canvas)
     this.io?.observe(lens.canvas)
     if (lens.source)
@@ -412,7 +432,17 @@ export class Renderer {
 
   // ---------------------------------------------------------------- frame
 
-  private frame(_now: number, dt: number): boolean {
+  private frame(now: number, dt: number): boolean {
+    const t0 = performance.now()
+    try {
+      return this.frameInner(now, dt)
+    }
+    finally {
+      this.stats.cpuMs += performance.now() - t0
+    }
+  }
+
+  private frameInner(_now: number, dt: number): boolean {
     this.stats.frames = this.scheduler.frames
     const gl = this.gl
     if (!gl || this.lost || this.disposed)
@@ -646,10 +676,18 @@ export class Renderer {
     sp: ReturnType<typeof toShaderParams>,
   ): void {
     const { pw, ph, cssW, cssH } = l
-    // grow-only shared canvas, rounded to limit reallocations
-    if (this.canvas.width < pw || this.canvas.height < ph) {
-      this.canvas.width = Math.max(this.canvas.width, Math.ceil(pw / 128) * 128)
-      this.canvas.height = Math.max(this.canvas.height, Math.ceil(ph / 128) * 128)
+    const c = this.canvas
+    if (this.present === 'bitmap') {
+      // the transferred bitmap is the whole canvas, so match the lens exactly
+      if (c.width !== pw)
+        c.width = pw
+      if (c.height !== ph)
+        c.height = ph
+    }
+    else if (c.width < pw || c.height < ph) {
+      // grow-only, rounded to limit reallocations
+      c.width = Math.max(c.width, Math.ceil(pw / 128) * 128)
+      c.height = Math.max(c.height, Math.ceil(ph / 128) * 128)
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
     gl.viewport(0, 0, pw, ph)
@@ -679,9 +717,14 @@ export class Renderer {
     gl.drawArrays(gl.TRIANGLES, 0, 3)
     this.stats.draws++
 
-    const ctx = l.ctx!
-    ctx.globalCompositeOperation = 'copy'
-    ctx.drawImage(this.canvas, 0, this.canvas.height - ph, pw, ph, 0, 0, pw, ph)
+    if (this.present === 'bitmap') {
+      (l.ctx as ImageBitmapRenderingContext).transferFromImageBitmap((c as OffscreenCanvas).transferToImageBitmap())
+    }
+    else {
+      const ctx = l.ctx as CanvasRenderingContext2D
+      ctx.globalCompositeOperation = 'copy'
+      ctx.drawImage(c, 0, c.height - ph, pw, ph, 0, 0, pw, ph)
+    }
   }
 }
 

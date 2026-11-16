@@ -25,6 +25,7 @@ export default antfu({
     'scripts/**',
     'test/**',
     'e2e/**',
+    'bench/**',
     '**/*.config.ts',
   ],
   rules: { 'no-console': 'off', 'node/prefer-global/process': 'off', 'ts/no-explicit-any': 'off' },

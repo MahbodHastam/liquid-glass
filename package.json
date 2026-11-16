@@ -62,7 +62,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "size": "node scripts/size.ts",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "bench": "playwright test -c bench"
   },
   "peerDependencies": {
     "@nuxt/kit": ">=3.13.0",
