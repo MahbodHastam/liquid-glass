@@ -1,8 +1,8 @@
-# @mahbodhastam/liquid-glass
+# Liquid Glass
 
 Liquid glass for **Vue 3** and **Nuxt**, rendered with **WebGL2 shaders**. It does real
 refraction, lens distortion, chromatic aberration, frost and edge lighting, and works in every
-modern browser (not only Chromium).
+modern browser.
 
 - **Real shader**: an SDF-masked lens with a quarter-circle bevel profile. It is not an SVG
   displacement filter, so Safari and Firefox get the same effect.
@@ -208,12 +208,6 @@ pnpm test:e2e       # real WebGL: Chromium, Firefox, WebKit, Nuxt SSR
 pnpm size           # 12 KiB min+gzip budget
 pnpm bench          # presentation benchmark (docs/perf.md)
 ```
-
-## Credits
-
-The visual technique (rounded-box SDF mask, quarter-circle lens profile, rim-weighted
-chromatic aberration, frost grain) was inspired by
-[aliajafari/Liquid-Glass-with-WebGL](https://github.com/aliajafari/Liquid-Glass-with-WebGL). The engine here is a from-scratch implementation.
 
 ## License
 
