@@ -1,0 +1,97 @@
+{
+  "name": "@mahbodhastam/liquid-glass",
+  "type": "module",
+  "version": "0.0.0",
+  "packageManager": "pnpm@12.18.0",
+  "description": "WebGL2 liquid glass for Vue 3 and Nuxt: real shader refraction, on-demand rendering, accessible by default.",
+  "author": "Mahbod Hastam (https://github.com/MahbodHastam)",
+  "license": "MIT",
+  "homepage": "https://github.com/MahbodHastam/liquid-glass#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MahbodHastam/liquid-glass.git"
+  },
+  "keywords": [
+    "vue",
+    "nuxt",
+    "webgl",
+    "webgl2",
+    "glsl",
+    "liquid-glass",
+    "glassmorphism",
+    "refraction",
+    "shader"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "default": "./dist/core.js"
+    },
+    "./snapdom": {
+      "types": "./dist/snapdom.d.ts",
+      "default": "./dist/snapdom.js"
+    },
+    "./nuxt": {
+      "types": "./dist/nuxt.d.ts",
+      "default": "./dist/nuxt.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "pnpm --filter playground dev",
+    "dev:nuxt": "pnpm --filter playground-nuxt dev",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "size": "node scripts/size.ts",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "@nuxt/kit": ">=3.13.0",
+    "@zumer/snapdom": ">=2.0.0",
+    "vue": ">=3.4.0"
+  },
+  "peerDependenciesMeta": {
+    "@nuxt/kit": {
+      "optional": true
+    },
+    "@zumer/snapdom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^10.0.0",
+    "@nuxt/kit": "^4.6.4",
+    "@nuxt/schema": "^4.6.4",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^24.0.0",
+    "@vue/test-utils": "^2.6.0",
+    "@zumer/snapdom": "^3.7.6",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.15.0",
+    "happy-dom": "^21.0.4",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.7",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0",
+    "vue": "^3.5.45"
+  }
+}

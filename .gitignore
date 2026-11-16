@@ -1,0 +1,10 @@
+node_modules
+dist
+.output
+.nuxt
+.data
+test-results
+playwright-report
+.playwright-mcp
+*.log
+.DS_Store
