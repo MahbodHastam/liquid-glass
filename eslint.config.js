@@ -10,6 +10,7 @@ export default antfu({
     'test-results',
     '.playwright-mcp',
     'docs/**/*.md',
+    'docs-site/content/**/*.md', // MDC syntax is not plain markdown
   ],
 }, {
   rules: {

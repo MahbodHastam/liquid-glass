@@ -55,6 +55,8 @@
     "build": "tsdown",
     "dev": "pnpm --filter playground dev",
     "dev:nuxt": "pnpm --filter playground-nuxt dev",
+    "docs:dev": "pnpm --filter docs-site dev",
+    "docs:build": "pnpm build && pnpm --filter docs-site build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
