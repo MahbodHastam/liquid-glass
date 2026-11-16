@@ -213,8 +213,7 @@ pnpm bench          # presentation benchmark (docs/perf.md)
 
 The visual technique (rounded-box SDF mask, quarter-circle lens profile, rim-weighted
 chromatic aberration, frost grain) was inspired by
-[aliajafari/Liquid-Glass-with-WebGL](https://github.com/aliajafari/Liquid-Glass-with-WebGL)
-(MIT). The engine here is a from-scratch implementation.
+[aliajafari/Liquid-Glass-with-WebGL](https://github.com/aliajafari/Liquid-Glass-with-WebGL). The engine here is a from-scratch implementation.
 
 ## License
 
