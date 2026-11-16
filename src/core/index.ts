@@ -1,6 +1,6 @@
 export { acquireMediaSource, computeFit, MediaSource, releaseMediaSource } from './backdrop/media'
 export type { MediaElement } from './backdrop/media'
-export { CoalescingQueue, LENS_ATTR, SnapshotSource } from './backdrop/snapshot'
+export { CoalescingQueue, LENS_ATTR, SNAP_ATTR, SnapshotSource } from './backdrop/snapshot'
 export type { CaptureFn, CaptureLoader, CaptureOptions, SnapshotOptions } from './backdrop/snapshot'
 export type { BackdropSource, UvRect } from './backdrop/types'
 export { Lens } from './lens'

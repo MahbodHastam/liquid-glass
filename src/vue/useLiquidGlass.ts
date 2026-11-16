@@ -7,7 +7,7 @@ import type { FallbackReason, ReducedMotionMode } from '../core/preferences'
 import type { QualitySetting, QualityTier } from '../core/quality'
 import { computed, getCurrentInstance, inject, onActivated, onBeforeUnmount, onDeactivated, onMounted, onUpdated, readonly, shallowRef, toValue, watch } from 'vue'
 import { acquireMediaSource, releaseMediaSource } from '../core/backdrop/media'
-import { LENS_ATTR } from '../core/backdrop/snapshot'
+import { LENS_ATTR, SNAP_ATTR } from '../core/backdrop/snapshot'
 import { resolveParams } from '../core/params'
 import { configureRenderer, getRenderer } from '../core/renderer'
 import { BACKDROP_KEY, CONFIG_KEY } from './context'
@@ -86,6 +86,15 @@ export function useLiquidGlass(
     return media ?? backdrop?.source.value ?? null
   }
 
+  /** A lens without its own media source renders from the enclosing snapshot, so it must not be in it. */
+  function markSnapshotConsumer(): void {
+    if (!host)
+      return
+    if (backdrop && !toValue(opts.value.source))
+      host.setAttribute(SNAP_ATTR, '')
+    else host.removeAttribute(SNAP_ATTR)
+  }
+
   function start(): void {
     const el = toValue(target)
     if (!isClient || !el || lens)
@@ -109,6 +118,9 @@ export function useLiquidGlass(
       el.setAttribute(LENS_ATTR, '')
       restore.push(() => el.removeAttribute(LENS_ATTR))
     }
+    // before any snapshot is taken: the backdrop's first capture runs after this mount hook
+    restore.push(() => host?.removeAttribute(SNAP_ATTR))
+    markSnapshotConsumer()
 
     canvas = document.createElement('canvas')
     canvas.setAttribute('aria-hidden', 'true')
@@ -201,7 +213,10 @@ export function useLiquidGlass(
   })
   watch(reducedMotion, m => lens?.setReducedMotion(m))
   watch(() => !!opts.value.interactive, v => lens?.setInteractive(v))
-  watch(source, () => lens?.setSource(resolveSource()), { flush: 'post' })
+  watch(source, () => {
+    markSnapshotConsumer()
+    lens?.setSource(resolveSource())
+  }, { flush: 'post' })
 
   return {
     isWebGL: readonly(computed(() => status.value.webgl)),

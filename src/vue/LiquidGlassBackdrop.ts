@@ -4,6 +4,7 @@ import type { BackdropSource } from '../core/backdrop/types'
 import { defineComponent, h, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue'
 import { SnapshotSource } from '../core/backdrop/snapshot'
 import { devWarn } from '../core/backdrop/types'
+import { peekRenderer } from '../core/renderer'
 import { BACKDROP_KEY, CONFIG_KEY } from './context'
 import { useLiquidGlassPreferences } from './usePreferences'
 
@@ -18,7 +19,12 @@ export const LiquidGlassBackdrop = defineComponent({
     as: { type: String, default: 'div' },
     /** Override the capture loader from the plugin config. */
     capture: { type: Function as PropType<CaptureLoader>, default: undefined },
-    /** Capture resolution multiplier (× min(dpr, maxDpr)). Default 0.5. */
+    /**
+     * Capture resolution multiplier (× min(dpr, maxDpr)). Default 0.5, which blur hides. Raise it
+     * (up to 1) when lenses magnify (`zoom`) or refract text. The whole backdrop is one texture, so
+     * the result is also capped by the GPU's max texture size and a 16 MP canvas limit: a tall page
+     * is captured at less than the requested scale.
+     */
     captureScale: { type: Number, default: undefined },
     /** Re-capture on DOM mutations inside the backdrop (debounced). */
     observe: { type: Boolean, default: false },
@@ -60,6 +66,12 @@ export const LiquidGlassBackdrop = defineComponent({
         loader,
         scale: props.captureScale,
         maxDpr: config.maxDpr,
+        maxEdge: () => {
+          const gl = peekRenderer()?.gl
+          return gl
+            ? gl.getParameter(gl.MAX_TEXTURE_SIZE) as number
+            : undefined
+        },
         observeMutations: props.observe,
         embedFonts: props.embedFonts,
       })

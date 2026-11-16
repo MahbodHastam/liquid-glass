@@ -62,6 +62,33 @@ describe('client', () => {
     wrapper.unmount()
   })
 
+  it('hides only snapshot-consuming lenses from the capture', async () => {
+    const img = document.createElement('img')
+    const wrapper = mount(
+      defineComponent(() => () =>
+        h(LiquidGlassBackdrop, null, () => [
+          h(LiquidGlass, { class: 'nav' }, () => 'nav'),
+          h(LiquidGlass, { class: 'card', source: img }, () => 'card'),
+        ])),
+      {
+        attachTo: document.body,
+        global: {
+          plugins: [
+            createLiquidGlass(),
+          ],
+        },
+      },
+    )
+    await nextTick()
+    // no own source -> renders from the snapshot -> must not be in it (feedback loop)
+    expect(wrapper.find('.nav').attributes('data-lg-snap')).toBeDefined()
+    // own media source -> ordinary page content -> stays in the snapshot
+    expect(wrapper.find('.card').attributes('data-lg-snap')).toBeUndefined()
+    expect(wrapper.find('.card').attributes('data-lg-lens')).toBeDefined()
+    wrapper.unmount()
+    expect(document.querySelector('[data-lg-snap]')).toBeNull()
+  })
+
   it('disabled never creates a renderer or canvas', async () => {
     const wrapper = mount(LiquidGlass, {
       props: { disabled: true },

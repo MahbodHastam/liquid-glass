@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// Module fixture: exercised by e2e/nuxt.spec.ts (SSR fallback, hydration, WebGL upgrade).
 // auto-imported by the module
 const { reducedMotion } = useLiquidGlassPreferences()
 const img = ref<HTMLImageElement | null>(null)

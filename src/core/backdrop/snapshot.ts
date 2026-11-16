@@ -5,7 +5,7 @@ import { devWarn, Emitter } from './types'
 export interface CaptureOptions {
   /** Output pixels per CSS px. */
   scale: number
-  /** CSS selector of nodes to hide from the capture (the glass elements themselves). */
+  /** CSS selector of nodes to hide from the capture (lenses that render from this snapshot). */
   exclude: string
   backgroundColor: string | null
   embedFonts: boolean
@@ -22,13 +22,25 @@ export interface SnapshotOptions {
   /** Capture resolution multiplier on top of min(dpr, maxDpr). Default 0.5 — blur hides it. */
   scale?: number
   maxDpr?: number
+  /** Largest texture edge the GPU accepts, in px. Read at capture time. Default 4096. */
+  maxEdge?: () => number | undefined
   /** Re-capture on DOM mutations inside the container (debounced). Default false. */
   observeMutations?: boolean
   embedFonts?: boolean
 }
 
 export const LENS_ATTR = 'data-lg-lens'
-const MAX_EDGE = 4096
+/**
+ * Marks a lens that renders from a <LiquidGlassBackdrop> snapshot. Only these are hidden from
+ * the capture (otherwise they would refract their own image). Lenses with their own media
+ * `source` are ordinary page content, so their content is part of the snapshot.
+ */
+export const SNAP_ATTR = 'data-lg-snap'
+const DEFAULT_MAX_EDGE = 4096
+/** Ceiling even when the GPU allows more: memory grows with area, and the capture needs a 2D canvas too. */
+const MAX_EDGE_CEILING = 8192
+/** Safari/iOS refuse canvases above 16 777 216 px, so stay under it. */
+const MAX_AREA = 16_000_000
 
 /** Coalescing async queue: one run in flight, at most one queued behind it. */
 export class CoalescingQueue {
@@ -107,10 +119,15 @@ export class SnapshotSource implements BackdropSource {
         return
       const dpr = Math.min(globalThis.devicePixelRatio || 1, this.opts.maxDpr ?? 1.5)
       let scale = (this.opts.scale ?? 0.5) * dpr
-      scale = Math.min(scale, MAX_EDGE / Math.max(r.width, r.height))
+      const edge = Math.min(this.opts.maxEdge?.() || DEFAULT_MAX_EDGE, MAX_EDGE_CEILING)
+      scale = Math.min(
+        scale,
+        edge / Math.max(r.width, r.height),
+        Math.sqrt(MAX_AREA / (r.width * r.height)),
+      )
       const canvas = await capture(this.container, {
         scale,
-        exclude: `[${LENS_ATTR}]`,
+        exclude: `[${SNAP_ATTR}]`,
         backgroundColor: resolveBackground(this.container),
         embedFonts: this.opts.embedFonts ?? false,
       })
