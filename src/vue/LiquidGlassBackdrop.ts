@@ -18,14 +18,14 @@ export const LiquidGlassBackdrop = defineComponent({
   props: {
     as: { type: String, default: 'div' },
     /** Override the capture loader from the plugin config. */
-    capture: { type: Function as PropType<CaptureLoader>, default: undefined },
+    capture: { type: Function as PropType<CaptureLoader> },
     /**
      * Capture resolution multiplier (× min(dpr, maxDpr)). Default 0.5, which blur hides. Raise it
      * (up to 1) when lenses magnify (`zoom`) or refract text. The whole backdrop is one texture, so
      * the result is also capped by the GPU's max texture size and a 16 MP canvas limit: a tall page
      * is captured at less than the requested scale.
      */
-    captureScale: { type: Number, default: undefined },
+    captureScale: { type: Number },
     /** Re-capture on DOM mutations inside the backdrop (debounced). */
     observe: { type: Boolean, default: false },
     /** Embed web fonts in the capture (slower, esp. Safari). */
@@ -66,12 +66,8 @@ export const LiquidGlassBackdrop = defineComponent({
         loader,
         scale: props.captureScale,
         maxDpr: config.maxDpr,
-        maxEdge: () => {
-          const gl = peekRenderer()?.gl
-          return gl
-            ? gl.getParameter(gl.MAX_TEXTURE_SIZE) as number
-            : undefined
-        },
+        // 0x0D33 = MAX_TEXTURE_SIZE
+        maxEdge: () => peekRenderer()?.gl?.getParameter(0x0D33) as number | undefined,
         observeMutations: props.observe,
         embedFonts: props.embedFonts,
       })

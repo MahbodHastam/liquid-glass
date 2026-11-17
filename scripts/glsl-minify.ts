@@ -15,7 +15,12 @@ export function minifyGlsl(src: string): string {
           ? '\n'
           : ''}${line}\n`
       }
-      return out + line.replace(/\s*([{}()[\];,=+\-*/<>!?:&|])\s*/g, '$1').replace(/\s+/g, ' ')
+      return out + line
+        .replace(/\s*([{}()[\];,=+\-*/<>!?:&|])\s*/g, '$1')
+        .replace(/\s+/g, ' ')
+        // shorten float literals: 2.0 -> 2., 0.125 -> .125 (both valid GLSL ES 3.00)
+        .replace(/(?<![\w.])(\d+)\.0+(?![\d.])/g, '$1.')
+        .replace(/(?<![\w.])0\.(\d)/g, '.$1')
     }, '')
 }
 

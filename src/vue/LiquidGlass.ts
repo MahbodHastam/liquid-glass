@@ -23,36 +23,35 @@ export const LiquidGlass = defineComponent({
     /** Corner radius in px, or 'auto' to read computed border-radius (works with Tailwind rounded-*). */
     radius: {
       type: [Number, String] as PropType<number | 'auto'>,
-      default: undefined,
     },
     /** Backdrop blur in px. */
-    blur: { type: Number, default: undefined },
+    blur: { type: Number },
     /** Edge refraction, 0–1. */
-    refraction: { type: Number, default: undefined },
+    refraction: { type: Number },
     /** Magnification, >= 1. */
-    zoom: { type: Number, default: undefined },
+    zoom: { type: Number },
     /** Chromatic aberration, 0–1. 0 compiles out the extra texture taps. */
-    aberration: { type: Number, default: undefined },
+    aberration: { type: Number },
     /** Frost grain, 0–1. */
-    frost: { type: Number, default: undefined },
+    frost: { type: Number },
     /** Specular highlight, 0–1. */
-    light: { type: Number, default: undefined },
+    light: { type: Number },
     /** Light direction in degrees. */
-    lightAngle: { type: Number, default: undefined },
+    lightAngle: { type: Number },
     /** Inner edge glow, 0–1. */
-    edgeGlow: { type: Number, default: undefined },
+    edgeGlow: { type: Number },
     /** Edge glow width, 0–1. */
-    edgeWidth: { type: Number, default: undefined },
+    edgeWidth: { type: Number },
     /** CSS colour mixed over the glass by its alpha. */
-    tint: { type: String, default: undefined },
+    tint: { type: String },
     /** 0–1. */
-    opacity: { type: Number, default: undefined },
+    opacity: { type: Number },
     /** Refract this <img>/<video>/<canvas> (template ref) instead of an enclosing <LiquidGlassBackdrop>. */
-    source: { type: Object as PropType<MediaElement | null>, default: undefined },
+    source: { type: Object as PropType<MediaElement | null> },
     /** Pointer-reactive highlight; disabled under reduced motion. */
     interactive: { type: Boolean, default: false },
-    quality: { type: String as PropType<QualitySetting>, default: undefined },
-    reducedMotion: { type: String as PropType<ReducedMotionMode>, default: undefined },
+    quality: { type: String as PropType<QualitySetting> },
+    reducedMotion: { type: String as PropType<ReducedMotionMode> },
     /** Force the CSS fallback. */
     disabled: { type: Boolean, default: false },
   },
@@ -66,25 +65,10 @@ export const LiquidGlass = defineComponent({
   setup(props, { emit, slots, expose }) {
     const el = ref<HTMLElement | null>(null)
     const config = inject(CONFIG_KEY, {})
-    const options = computed(() => ({
-      radius: props.radius,
-      blur: props.blur,
-      refraction: props.refraction,
-      zoom: props.zoom,
-      aberration: props.aberration,
-      frost: props.frost,
-      light: props.light,
-      lightAngle: props.lightAngle,
-      edgeGlow: props.edgeGlow,
-      edgeWidth: props.edgeWidth,
-      tint: props.tint,
-      opacity: props.opacity,
-      source: props.source,
-      interactive: props.interactive,
-      quality: props.quality,
-      reducedMotion: props.reducedMotion,
-      disabled: props.disabled,
-    }))
+    const options = computed(() => {
+      const { as: _, ...rest } = props
+      return rest
+    })
     const { isWebGL, reason, quality, refresh, relayout } = useLiquidGlass(el, options)
 
     let wasReady = false

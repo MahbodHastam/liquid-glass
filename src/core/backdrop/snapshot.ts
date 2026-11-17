@@ -1,6 +1,6 @@
 import type { FallbackReason } from '../preferences'
 import type { BackdropSource, UvRect } from './types'
-import { devWarn, Emitter } from './types'
+import { devWarn, Emitter, MAX_TEXTURE_EDGE } from './types'
 
 export interface CaptureOptions {
   /** Output pixels per CSS px. */
@@ -36,7 +36,6 @@ export const LENS_ATTR = 'data-lg-lens'
  * `source` are ordinary page content, so their content is part of the snapshot.
  */
 export const SNAP_ATTR = 'data-lg-snap'
-const DEFAULT_MAX_EDGE = 4096
 /** Ceiling even when the GPU allows more: memory grows with area, and the capture needs a 2D canvas too. */
 const MAX_EDGE_CEILING = 8192
 /** Safari/iOS refuse canvases above 16 777 216 px, so stay under it. */
@@ -119,7 +118,7 @@ export class SnapshotSource implements BackdropSource {
         return
       const dpr = Math.min(globalThis.devicePixelRatio || 1, this.opts.maxDpr ?? 1.5)
       let scale = (this.opts.scale ?? 0.5) * dpr
-      const edge = Math.min(this.opts.maxEdge?.() || DEFAULT_MAX_EDGE, MAX_EDGE_CEILING)
+      const edge = Math.min(this.opts.maxEdge?.() || MAX_TEXTURE_EDGE, MAX_EDGE_CEILING)
       scale = Math.min(
         scale,
         edge / Math.max(r.width, r.height),

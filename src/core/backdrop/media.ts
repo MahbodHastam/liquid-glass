@@ -1,6 +1,6 @@
 import type { FallbackReason } from '../preferences'
 import type { BackdropSource, UvRect } from './types'
-import { devWarn, Emitter } from './types'
+import { devWarn, Emitter, MAX_TEXTURE_EDGE } from './types'
 
 export type MediaElement = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement
 
@@ -62,8 +62,6 @@ export function computeFit(
     h,
   }
 }
-
-const MAX_TEXTURE_EDGE = 4096
 
 /**
  * Backdrop from an <img>, <video> or <canvas> the app already renders. No DOM capture.

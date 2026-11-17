@@ -53,3 +53,6 @@ export class Emitter {
 export function devWarn(msg: string): void {
   console.warn(`[liquid-glass] ${msg}`)
 }
+
+/** Texture edge, in px, that every WebGL2 GPU supports; backdrops are scaled down to fit it. */
+export const MAX_TEXTURE_EDGE = 4096
