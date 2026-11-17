@@ -65,8 +65,17 @@ jobs:
       - name: Publish to npm
         run: npm publish --provenance --access public
 
+      - name: Check for a previous tag
+        id: prev
+        run: |
+          if git describe --tags --abbrev=0 "${{ steps.version.outputs.tag }}^" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Needs a previous tag; the first release falls back to GitHub's generated notes.
       - name: Generate changelog
         id: changelog
+        if: steps.prev.outputs.exists == 'true'
         uses: requarks/changelog-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -85,4 +94,5 @@ jobs:
           tag: ${{ steps.version.outputs.tag }}
           name: ${{ steps.version.outputs.tag }}
           body: ${{ steps.changelog.outputs.changes }}
+          generateReleaseNotes: ${{ steps.prev.outputs.exists != 'true' }}
           token: ${{ secrets.GITHUB_TOKEN }}

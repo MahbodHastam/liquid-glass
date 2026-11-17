@@ -28,16 +28,7 @@ export default defineConfig({
     ...(['Desktop Chrome', 'Desktop Firefox', 'Desktop Safari'] as const).map(d => ({
       name: d.split(' ')[1]!.toLowerCase(),
       testIgnore: /nuxt\.spec/,
-      use: {
-        ...devices[d],
-        baseURL: vite,
-        // Headless Firefox on GPU-less Linux CI disables WebGL; force software WebGL.
-        ...(d === 'Desktop Firefox' && {
-          launchOptions: {
-            firefoxUserPrefs: { 'webgl.force-enabled': true, 'webgl.disabled': false },
-          },
-        }),
-      },
+      use: { ...devices[d], baseURL: vite },
     })),
     {
       name: 'nuxt',

@@ -6,7 +6,7 @@
   "description": "WebGL2 liquid glass for Vue 3 and Nuxt: real shader refraction, on-demand rendering, accessible by default.",
   "author": "Mahbod Hastam (https://github.com/MahbodHastam)",
   "license": "MIT",
-  "homepage": "https://github.com/MahbodHastam/liquid-glass#readme",
+  "homepage": "https://liquid-glass.bodbod.ir",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MahbodHastam/liquid-glass.git"
