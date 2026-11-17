@@ -10,6 +10,19 @@ const states = (page: Page) => page.$$eval('[data-lg-lens]', els => els.map(e =>
 
 async function ready(page: Page) {
   await page.goto('/')
+  // Headless Firefox on GPU-less Linux CI has no WebGL2: check the CSS fallback, then skip.
+  if (page.context().browser()?.browserType().name() === 'firefox') {
+    const hasWebGL2 = await page.evaluate(() => !!document.createElement('canvas').getContext('webgl2'))
+    if (!hasWebGL2) {
+      await expect.poll(() => states(page)).toEqual([
+        'fallback',
+        'fallback',
+        'fallback',
+        'fallback',
+      ])
+      test.skip(true, 'Firefox has no WebGL2 in this environment')
+    }
+  }
   await expect.poll(() => states(page), { timeout: 15_000 }).toEqual(['webgl', 'webgl', 'webgl', 'webgl'])
 }
 
