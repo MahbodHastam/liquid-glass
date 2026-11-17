@@ -1,18 +1,18 @@
 # Liquid Glass
 
-Liquid glass for **Vue 3** and **Nuxt**, rendered with **WebGL2 shaders**. It does real
+Liquid glass for Vue 3 and Nuxt, rendered with WebGL2 shaders. It does real
 refraction, lens distortion, chromatic aberration, frost and edge lighting, and works in every
 modern browser.
 
-- **Real shader**: an SDF-masked lens with a quarter-circle bevel profile. It is not an SVG
+- **Real shader.** An SDF-masked lens with a quarter-circle bevel profile. It is not an SVG
   displacement filter, so Safari and Firefox get the same effect.
-- **Costs nothing at idle**: frames render on demand and the page uses one shared WebGL
+- **Costs nothing at idle.** Frames render on demand and the page uses one shared WebGL
   context. Scrolling over a backdrop is a uniform update, not a re-upload.
-- **Accessible by default**: respects `prefers-reduced-motion`, `prefers-reduced-transparency`,
+- **Accessible by default.** It respects `prefers-reduced-motion`, `prefers-reduced-transparency`,
   `prefers-contrast`, `forced-colors` and Save-Data with no configuration.
-- **SSR-first**: the server renders a CSS `backdrop-filter` fallback. WebGL is layered on after
+- **SSR-first.** The server renders a CSS `backdrop-filter` fallback. WebGL is layered on after
   mount. Hydration has no warnings and needs no `<ClientOnly>`.
-- **Small**: under 12 KiB min+gzip for everything in the main entry. The DOM-capture library is
+- **Small.** Under 12 KiB min+gzip for everything in the main entry. The DOM-capture library is
   optional and lazy-loaded.
 
 ## Install
@@ -23,7 +23,7 @@ pnpm add @mahbodhastam/liquid-glass
 pnpm add @zumer/snapdom
 ```
 
-Requires Vue ≥ 3.4 (tested on 3.4 and 3.5). Nuxt ≥ 3.13, including Nuxt 4.
+Requires Vue 3.4 or newer, tested on 3.4 and 3.5, and Nuxt 3.13 or newer, including Nuxt 4.
 
 ## Vue
 
@@ -82,8 +82,8 @@ WebGL can't read the pixels behind a canvas, so each lens needs a source to refr
 
 | Source | Use it for | Cost |
 |---|---|---|
-| **Media**: `:source="imgRef"` (`<img>`, `<video>`, `<canvas>`) | Heroes, cards over photos, video backgrounds | Near zero. No DOM capture. Video updates once per video frame. Honours `object-fit` / `object-position`. |
-| **Snapshot**: wrap content in `<LiquidGlassBackdrop>` | Glass over arbitrary HTML, e.g. a sticky navbar over page content | One capture on mount, then again on resize, font load, image load or `refresh()`. Scrolling never re-captures. |
+| Media: `:source="imgRef"` (`<img>`, `<video>`, `<canvas>`) | Heroes, cards over photos, video backgrounds | Near zero. No DOM capture. Video updates once per video frame. Honours `object-fit` / `object-position`. |
+| Snapshot: wrap content in `<LiquidGlassBackdrop>` | Glass over arbitrary HTML, e.g. a sticky navbar over page content | One capture on mount, then again on resize, font load, image load or `refresh()`. Scrolling never re-captures. |
 
 ```vue
 <LiquidGlassBackdrop>
@@ -99,7 +99,7 @@ off), `captureScale` (default `0.5`; the blur hides the downscale), `embedFonts`
 **Snapshot limitations.** It rasterises with snapDOM (SVG `foreignObject`), so it is never
 pixel-perfect. It can't see cross-origin images without CORS, iframes, or some exotic CSS.
 Content that changes all the time (carousels, counters) needs `observe` or manual `refresh()`.
-Very tall containers are downscaled to fit 4096 px. Prefer the media source whenever the
+Very tall containers are captured at a lower scale to fit the GPU's texture size limit. Prefer the media source whenever the
 backdrop is an image or video.
 
 Cross-origin media must be CORS-enabled (`crossorigin="anonymous"` plus an
@@ -113,23 +113,23 @@ dev-mode warning.
 | `as` | `string` | `'div'` | Root tag |
 | `radius` | `number \| 'auto'` | `'auto'` | `'auto'` reads the computed `border-radius`, so Tailwind `rounded-*` works |
 | `blur` | px | `12` | |
-| `refraction` | 0–1 | `0.3` | Rim displacement |
-| `zoom` | ≥ 1 | `1.1` | |
-| `aberration` | 0–1 | `0.2` | `0` compiles out two texture taps |
-| `frost` | 0–1 | `0.08` | Static grain |
-| `light` | 0–1 | `0.3` | Specular rim |
+| `refraction` | 0 to 1 | `0.3` | Rim displacement |
+| `zoom` | 1 or more | `1.1` | |
+| `aberration` | 0 to 1 | `0.2` | `0` compiles out two texture taps |
+| `frost` | 0 to 1 | `0.08` | Static grain |
+| `light` | 0 to 1 | `0.3` | Specular rim |
 | `lightAngle` | deg | `-55` | |
-| `edgeGlow`, `edgeWidth` | 0–1 | `0.4`, `0.25` | |
+| `edgeGlow`, `edgeWidth` | 0 to 1 | `0.4`, `0.25` | |
 | `tint` | CSS colour | `'transparent'` | Mixed in by its alpha |
-| `opacity` | 0–1 | `1` | |
-| `source` | element | — | Media backdrop |
+| `opacity` | 0 to 1 | `1` | |
+| `source` | element | none | Media backdrop |
 | `interactive` | `boolean` | `false` | Pointer-reactive highlight (disabled under reduced motion) |
 | `quality` | `'auto' \| 'high' \| 'medium' \| 'low' \| 'off'` | `'auto'` | |
 | `reducedMotion` | `'auto' \| 'static' \| 'fallback' \| 'ignore'` | `'auto'` | See below |
 | `disabled` | `boolean` | `false` | Forces the CSS fallback |
 
-**Events:** `ready`, `fallback(reason)`, `contextlost`, `contextrestored`.
-**Exposed:** `refresh()`, `relayout()`, `isWebGL`, `quality`.
+Events: `ready`, `fallback(reason)`, `contextlost`, `contextrestored`.
+Exposed: `refresh()`, `relayout()`, `isWebGL`, `quality`.
 
 The element is re-measured after every Vue re-render and on scroll/resize. If you move it some
 other way (a CSS animation, or direct style writes), call `relayout()`. It costs one
@@ -155,7 +155,7 @@ These work with no configuration and react to runtime changes:
 
 | User preference | Behaviour |
 |---|---|
-| `prefers-reduced-motion: reduce` | Still glass, but refraction ×0.35, zoom → 1, no pointer tracking. No animation loop ever runs. |
+| `prefers-reduced-motion: reduce` | Still glass, but refraction drops to 35%, zoom drops to 1, no pointer tracking. No animation loop ever runs. |
 | `reducedMotion="fallback"` + reduce | CSS fallback instead |
 | `reducedMotion="static"` | Always behave as reduced |
 | `reducedMotion="ignore"` | Opt out (discouraged) |
@@ -179,7 +179,7 @@ backdrop.
 - Frames render on demand only. Idle means zero `requestAnimationFrame` calls and zero GL
   calls; e2e tests verify this.
 - The blur (dual-filter / dual Kawase) is computed once per backdrop change and cached. The
-  glass pass reads 1–3 texture taps per pixel.
+  glass pass reads 1 to 3 texture taps per pixel.
 - Off-screen lenses and background tabs don't render.
 - The DPR is capped (default 1.5). Quality tiers lower DPR, blur passes, aberration and frost.
   `auto` starts from device hints, steps down after sustained slow frames, and never steps
@@ -188,7 +188,7 @@ backdrop.
   restored.
 
 Measured numbers and methods are in [docs/perf.md](docs/perf.md). Real-device mobile numbers
-are **still pending**.
+are still pending.
 
 ## Browser support
 

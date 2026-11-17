@@ -1,8 +1,8 @@
 ---
-title: liquid-glass
+title: Liquid Glass
 description: WebGL2 liquid glass for Vue 3 and Nuxt. Real shader refraction, on-demand rendering, accessible by default.
 seo:
-  title: liquid-glass for Vue and Nuxt
+  title: Liquid Glass for Vue and Nuxt
 ---
 
 ::u-page-hero
@@ -10,7 +10,7 @@ seo:
 Liquid glass for Vue and Nuxt
 
 #description
-Real WebGL2 refraction, lens distortion, chromatic aberration and frost. Zero cost at idle, SSR-first, accessible by default.
+A WebGL2 shader that bends, magnifies and tints what's behind it. It does no work while the page is idle, renders safely on the server, and follows your users' accessibility settings.
 
 #links
   :::u-button
@@ -35,38 +35,40 @@ Real WebGL2 refraction, lens distortion, chromatic aberration and frost. Zero co
   :::
 ::
 
+::u-container
 :glass-demo{tint="rgb(255 255 255 / 0.08)"}
 
-::card-group
-  :::card
+  :::card-group
+  ::::card
   ---
   icon: i-lucide-sparkles
-  title: Real shader
+  title: Drawn by a shader
   ---
-  SDF-masked lens with a bevel profile. Not an SVG filter, so Safari and Firefox match Chromium.
-  :::
+  The refraction is computed on the GPU instead of with an SVG filter, so Safari and Firefox look like Chrome.
+  ::::
 
-  :::card
+  ::::card
   ---
   icon: i-lucide-gauge
-  title: Free at idle
+  title: Quiet when idle
   ---
-  On-demand frames and one shared WebGL context per page. Under 12 KiB min+gzip.
-  :::
+  Frames are drawn only when something changes, and every lens on the page shares one WebGL context. The whole thing is under 12 KiB min+gzip.
+  ::::
 
-  :::card
+  ::::card
   ---
   icon: i-lucide-accessibility
-  title: Accessible by default
+  title: Respects user settings
   ---
-  Honours reduced motion, reduced transparency, contrast, forced colors and Save-Data.
-  :::
+  Reduced motion, reduced transparency, high contrast, forced colors and Save-Data are handled for you.
+  ::::
 
-  :::card
+  ::::card
   ---
   icon: i-lucide-server
-  title: SSR-first
+  title: Works with SSR
   ---
-  The server renders a CSS `backdrop-filter` fallback. WebGL layers on after mount, with no hydration warnings.
-  :::
+  The server renders a CSS `backdrop-filter` version. The shader takes over after mount, without hydration warnings.
+  ::::
+:::
 ::

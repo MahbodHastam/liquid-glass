@@ -1,8 +1,3 @@
-// GLSL ES 3.00 sources, inlined as strings so there is no runtime fetch.
-// The visual technique (rounded-box SDF mask, quarter-circle lens profile, rim-weighted
-// chromatic aberration, static frost grain) is credited to aliajafari/Liquid-Glass-with-WebGL;
-// this implementation is written from scratch.
-
 /** Fullscreen triangle from gl_VertexID, no vertex buffers. v_uv: (0,0) bottom-left. */
 export const FULLSCREEN_VERT = /* glsl */ `#version 300 es
 out vec2 v_uv;

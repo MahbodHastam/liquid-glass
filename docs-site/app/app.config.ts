@@ -3,7 +3,7 @@ export default defineAppConfig({
     locale: 'en',
   },
   seo: {
-    title: 'liquid-glass',
+    title: 'Liquid Glass',
     description: 'WebGL2 liquid glass for Vue 3 and Nuxt: real shader refraction, on-demand rendering, accessible by default.',
   },
   github: {
